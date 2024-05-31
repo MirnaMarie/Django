@@ -1,0 +1,47 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header1"><h1>{{ title }}</h1></div>
+<p class="text2"><i>Используйте локальную учётную запись для входа в систему</i></p>
+
+<script>
+    $(document).ready(function () {
+        console.log('aboba')
+        $('input').focus(function () {
+            $(this).css('background-color', 'white');
+        });
+        $('input').blur(function () {
+            $(this).css('background-color', 'lightgrey');
+        })
+    });
+</script>
+
+<div class="feedback">
+    <form method="post">
+        {% csrf_token %}
+        <label class="text1" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        {{ form.username }}<br /><br />
+        <label class="text1" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        {{ form.password }}<br /><br />
+        <div class="col-md-offset-2 col-md-10">
+            <input type="hidden" name="next" value="/" />
+        </div>
+        {% if form.errors %}
+        <p class="text3">Пожалуйста введите корректные имя пользователя и пароль</p>
+        {% endif %}
+        <div class="button">
+            <button class="submit" type="submit">Войти</button>
+        </div>
+    </form>
+</div>
+    <div class="col-md-4">
+        <section id="socialLoginForm"></section>
+    </div>
+
+        {% endblock %}
+
+        {% block scripts %}
+        {% load static %}
+<script src="{% static 'app/scripts/jquery.validate.min.js' %}"></script>
+        {% endblock %}

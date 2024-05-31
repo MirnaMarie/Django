@@ -1,0 +1,13 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+{% load static %}
+
+<div class="header"><h1>{{ title }}</h1></div>
+<div id="links">
+    <p><a href="https://www.divo-ostrov.ru/" target="_blank"> <img src="{% static 'app/content/divo_logo1.png' %}" alt="Logo 1"/></a></p>
+    <p><a href="https://www.sochipark.ru/" target="_blank"> <img src="{% static 'app/content/sochi_park1.png' %}" alt="Logo 2" /></a></p>
+    <p><a href="https://dreamisland.ru/" target="_blank"> <img src="{% static 'app/content/ostrov_logo.png' %}" alt="Logo 3" /></a></p>
+</div>
+    {% endblock %}

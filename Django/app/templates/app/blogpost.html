@@ -1,0 +1,47 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="header3"><h1>{{post_1.title}}</h1></div>
+
+<div class="blogpost">
+    <p class="textcom"> {{post_1.content|linebreaksbr}} </p>
+    <br/>
+    {% if post_1.image and post_1.image.url != '/media/temp.jpg'%}
+    <div class="picturepost">
+        <img src="{{ post_1.image.url }}" alt="Картинка статьи блога" />
+    </div>
+    {% endif %}
+</div>
+<div class="comment">
+    <div>
+        {% for comment in comments %}
+        <p class="textcom"> {{comment.author}} </p>
+        <p class="textcom"> {{comment.date}} </p>
+        <p class="textcom"> {{comment.text|linebreaksbr}} </p>
+        <hr />
+        {% endfor %}
+    </div>
+    <br />
+    {% if user.is_authenticated %}
+
+    <div>
+        <form method="POST">
+            {% csrf_token %}
+            <p class="text4">Добавить комментарий</p>
+            <div class="text4">
+                {{form.as_p}}
+            </div>
+            <div class="button">
+                <button type="submit" class="submit"> Отправить </button>
+            </div>
+        </form>
+    </div>
+
+    {% else %}
+    <div>
+        <p class="textcom"> Для добавления своего комментария, пожалуйста, авторизуйтесь </p>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

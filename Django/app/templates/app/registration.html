@@ -1,0 +1,18 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header1"><h1>Регистрация пользователя</h1></div>
+
+<div class="feedback">
+    <form method="post">
+        {% csrf_token %}
+        <div class="text4">
+            {{ regform.as_p }}
+        </div>
+        <div class="button">
+            <button class="submit" type="submit">Зарегистрировать</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

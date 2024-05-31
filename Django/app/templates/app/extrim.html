@@ -1,0 +1,11 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header"><h1>Экстремальные аттракционы</h1></div>
+
+{% load static %}
+<div class="picture">
+    <img src="{% static 'app/content/extrim.jpg'%} " alt="Экстремальные аттракционы">
+</div>
+{% endblock %}

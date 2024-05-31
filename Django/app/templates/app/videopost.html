@@ -1,0 +1,25 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+{% load static %}
+
+<div class="header"><h1>Видео</h1></div>
+<div class="videopost">
+    <div>
+        <p class="text1">Видео-ролик 1</p>
+        <br />
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/Wywy2FdbEbo?si=7YJ3VQbM3C0Za7HT" title="YouTube video player"
+                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <br />
+    <p class="text1">Видео-ролик 2</p>
+    <br />
+    <div>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/DkKm2aM3xBQ?si=qZZrKoFvc0dp1_W2" title="YouTube video player"
+                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+</div>
+{% endblock %}

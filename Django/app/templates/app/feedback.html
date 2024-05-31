@@ -1,0 +1,75 @@
+﻿{% extends "app/layout.html" %}
+
+{% block content %}
+{% if form != None %}
+<div class="header1"><h1>Оставьте свой отзыв :)</h1></div>
+<script>$(document).ready(function () {
+    console.log('aboba')
+    $('#submit').mouseover(function () {
+        $(this).css('color', '#ee9772')
+    })
+    $('#submit').mouseout(function () {
+        $(this).css('color', 'white')
+    })
+    $('input').focus(function () {
+        $(this).css('background-color', 'white');
+    });
+    $('input').blur(function () {
+        $(this).css('background-color', 'lightgrey');
+    })
+    $('select').focus(function () {
+        $(this).css('background-color', 'white');
+    });
+    $('select').blur(function () {
+        $(this).css('background-color', 'lightgrey');
+    })
+    $('textarea').focus(function () {
+        $(this).css('background-color', 'white');
+    });
+    $('textarea').blur(function () {
+        $(this).css('background-color', 'lightgrey');
+    })
+});
+</script>
+<div class="feedback">
+    <form method="post">
+        {% csrf_token %}
+        <label class="text1" for="{{ form.name.id_for_label }}">{{ form.name.label }}:</label>
+        {{ form.name }}<br /><br />
+        <label class="text1" for="{{ form.like.id_for_label }}">{{ form.like.label }}</label>
+        {{ form.like }}<br /><br />
+        <label class="text1" for="{{ form.upgrade.id_for_label }}">{{ form.upgrade.label }}</label>
+        {{ form.upgrade }}<br /><br />
+        <label class="text1" for="{{ form.recommend.id_for_label }}">{{ form.recommend.label }}</label>
+        {{ form.recommend }}<br />
+        <label class="text1" for="{{ form.level.id_for_label }}">{{ form.level.label }}</label>
+        {{ form.level }}<br /><br />
+        <label class="text1" for="{{ form.notice.id_for_label }}">{{ form.notice.label }}</label>
+        {{ form.notice }}<br /><br />
+        <label class="text1" for="{{ form.email.id_for_label }}">{{ form.email.label }}:</label>
+        {{ form.email }}<br /><br />
+        <label class="text1" for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+        {{ form.message }}<br /><br />
+        <div class="button">
+            <button class="submit" type="submit">Отправить</button>
+        </div>
+    </form>
+</div>
+{% else %}
+<br />
+<div class="header1"><h1>Благодарим за предоставленную информацию!</h1></div>
+<div class="header2"><h1>Вы сообщили следущее:</h1></div>
+<div class="feedback1">
+    <ul>
+        <li><span>Имя:</span> {{ data.name }}</li>
+        <li><span>Что вам понравилось в нашем сайте:</span> {{ data.like }}</li>
+        <li><span>Что можно улучшить:</span> {{ data.upgrade }}</li>
+        <li><span>Вы порекомендуете нас своим друзьям и коллегам:</span> {{ data.recommend }}</li>
+        <li><span>Как бы вы оценили общий уровень удовлетворенности работой нашего сайта:</span> {{ data.level }}</li>
+        <li><span>Получать новости сайта на e-mail:</span> {{ data.notice }}</li>
+        <li><span>Ваш e-mail:</span> {{ data.email }}</li>
+        <li><span>Что еще вы хотели бы сообщить нам, чтобы улучшить наш сайт:</span> {{ data.message }}</li>
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
