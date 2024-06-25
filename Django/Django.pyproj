@@ -6,7 +6,7 @@
     <RootNamespace>Django</RootNamespace>
     <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
-    <InterpreterId>MSBuild|env1|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|env2|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -36,6 +36,9 @@
     <Compile Include="app\forms.py" />
     <Compile Include="app\migrations\0001_initial.py" />
     <Compile Include="app\models.py" />
+    <Compile Include="app\context_processors.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="app\tests.py" />
     <Compile Include="app\views.py" />
     <Compile Include="app\__init__.py" />
@@ -59,16 +62,27 @@
     <Folder Include="Django\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app\static\app\scripts\main.js" />
+    <Content Include="app\templates\app\all_tickets.html" />
+    <Content Include="app\templates\app\aviat.html" />
+    <Content Include="app\templates\app\basket.html" />
     <Content Include="app\templates\app\blog.html" />
     <Content Include="app\templates\app\blogpost.html" />
     <Content Include="app\templates\app\child.html" />
     <Content Include="app\templates\app\extrim.html" />
     <Content Include="app\templates\app\family.html" />
-    <Content Include="app\templates\app\links.html" />
     <Content Include="app\templates\app\feedback.html" />
+    <Content Include="app\templates\app\fire.html" />
+    <Content Include="app\templates\app\free.html" />
+    <Content Include="app\templates\app\gonki.html" />
+    <Content Include="app\templates\app\katam.html" />
+    <Content Include="app\templates\app\katap.html" />
+    <Content Include="app\templates\app\koleso.html" />
+    <Content Include="app\templates\app\my_tickets.html" />
     <Content Include="app\templates\app\newpost.html" />
+    <Content Include="app\templates\app\osminog.html" />
     <Content Include="app\templates\app\registration.html" />
-    <Content Include="app\templates\app\videopost.html" />
+    <Content Include="app\templates\app\shaker.html" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />
     <Content Include="app\static\app\content\bootstrap.css" />
@@ -93,7 +107,6 @@
     <Content Include="app\static\app\scripts\respond.js" />
     <Content Include="app\static\app\scripts\respond.min.js" />
     <Content Include="app\static\app\scripts\_references.js" />
-    <Content Include="app\templates\app\about.html" />
     <Content Include="app\templates\app\contact.html" />
     <Content Include="app\templates\app\index.html" />
     <Content Include="app\templates\app\layout.html" />
@@ -110,6 +123,15 @@
       <Id>env1</Id>
       <Version>3.9</Version>
       <Description>env1 (Python 3.9 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
+    <Interpreter Include="env2\">
+      <Id>env2</Id>
+      <Version>3.10</Version>
+      <Description>env2 (Python 3.10 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
