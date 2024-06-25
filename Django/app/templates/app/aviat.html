@@ -1,0 +1,23 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header2"><h1>Авиаторы</h1></div>
+
+{% load static %}
+<div class="attraction">
+    <div class="picturepost">
+        <div>
+            <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/aviat.jpg'%} " alt="Авиаторы">
+        </div>
+        <div>
+            <p class="text">
+                Еще один аттракцион для будущих отважных летчиков носит название «Авиаторы».
+                Красочные самолетики поднимут в своих кабинах малышей и их родителей прямо в небо, подарив ощущение полета и 
+                прекрасное настроение тем и другим.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

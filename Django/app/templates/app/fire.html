@@ -1,0 +1,23 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header2"><h1>Пожарная команда</h1></div>
+
+{% load static %}
+<div class="attraction">
+    <div class="picturepost">
+        <div>
+            <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/fire.jpg'%} " alt="Пожарная команда">
+        </div>
+        <div>
+            <p class="text">
+                Веселое соревнование ждет юных пожарников на этом увлекательном аттракционе. Из водных пистолетов, как из 
+                брандспойта, команда маленьких смельчаков потушит горящий дом. Но кто из них первым справится с задачей? 
+                Сила командного духа и незабываемые впечатления гарантированы тем, кто отважится на сражение со стихией.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

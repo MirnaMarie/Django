@@ -1,0 +1,24 @@
+{% extends "app/layout.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="header1"><h1>Корзина</h1></div>
+
+<div class="basket">
+    <div class="block_offer">
+        <div id="basket-items-container">
+            <p class="total_price">Общая сумма: <span id="total-price"></span> руб.</p>
+            <form method="post" action="{% url 'confirm_order' %}">
+                {% csrf_token %}
+                <input type="hidden" name="ticket_data" id="ticketDataInput" value="">
+                <button class="confirm" type="submit">Оформить заказ</button>
+            </form>
+        </div>
+    </div>
+    <div class="no-items" style="justify-content: center; align-items: center; display: none;">
+        <p class="text">Ваша корзина пуста</p>
+    </div>
+</div>
+    {% endblock %}

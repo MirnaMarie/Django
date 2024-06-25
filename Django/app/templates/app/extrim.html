@@ -5,7 +5,30 @@
 <div class="header"><h1>Экстремальные аттракционы</h1></div>
 
 {% load static %}
-<div class="picture">
-    <img src="{% static 'app/content/extrim.jpg'%} " alt="Экстремальные аттракционы">
+<div class="picture1">
+    <div>
+        <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/shaker.jpg'%} " alt="Шейкер">
+    </div>
+    <div class="button1">
+        <a class="submit" href="{% url 'shaker' %}">Шейкер</a>
+    </div>
+</div>
+
+<div class="picture2">
+    <div>
+        <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/katap.jpg'%} " alt="Катапульта">
+    </div>
+    <div class="button1">
+        <a class="submit" href="{% url 'katap' %}">Катапульта</a>
+    </div>
+</div>
+
+<div class="picture3">
+    <div>
+        <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/free.jpg'%} " alt="Свободное падение">
+    </div>
+    <div class="button1">
+        <a class="submit" href="{% url 'free' %}">Свободное падение</a>
+    </div>
 </div>
 {% endblock %}

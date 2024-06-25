@@ -5,8 +5,31 @@
 <div class="header"><h1>Семейные аттракционы</h1></div>
 
 {% load static %}
-<div class="picture">
-    <img src="{% static 'app/content/family.jpg'%} " alt="Семейные аттракционы">
+<div class="picture1">
+    <div>
+        <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/gonki.jpg'%} " alt="Крутые гонки">
+    </div>
+    <div class="button1">
+        <a class="submit" href="{% url 'gonki' %}">Крутые гонки</a>
+    </div>
+</div>
+
+<div class="picture2">
+    <div>
+        <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/katam.jpg'%} " alt="Катамараны">
+    </div>
+    <div class="button1">
+        <a class="submit" href="{% url 'katam' %}">Катамараны</a>
+    </div>
+</div>
+
+<div class="picture3">
+    <div>
+        <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/koleso.jpg'%} " alt="Колесо обозрения">
+    </div>
+    <div class="button1">
+        <a class="submit" href="{% url 'koleso' %}">Колесо обозрения</a>
+    </div>
 </div>
 
 {% endblock %}

@@ -1,0 +1,30 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header1"><h1>Мои билеты</h1></div>
+
+<div class="basket">
+    <div class="block_offer">
+        <div class="ticket_basket">
+            <p>{{ data.user.username }}</p>
+            <strong>Билет №{{ data.id }}</strong>
+            <ul>
+                <li>{{ data.age }}</li>
+                <li>{{ statusText }}</li>
+                {% if ticket.status == 'standard' %}
+                <li>{{ attractionsText }}</li>
+                {% elif ticket.status == 'vip' %}
+                <li>{{ groupText }}</li>
+                {% endif %}
+            </ul>
+            <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=Ticket%20ID:%20{{ tickets.id }}" alt="QR Code">
+        </div>
+    </div>
+    <div class="no-items" style="justify-content: center; align-items: center; display: none;">
+        <p class="text">У Вас пока нет билетов.</p>
+    </div>
+</div>
+
+
+    {% endblock %}

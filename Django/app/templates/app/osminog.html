@@ -1,0 +1,23 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="header2"><h1>Осьминожка</h1></div>
+
+{% load static %}
+<div class="attraction">
+    <div class="picturepost">
+        <div>
+            <img style="border-radius: 10px; margin: 0 0 12px 0;" src="{% static 'app/content/osminog.jpg'%} " alt="Осьминожка">
+        </div>
+        <div>
+            <p class="text">
+                Огромный, но очень милый осьминог приглашает отважных мореплавателей принять участие в захватывающем морском приключении. 
+                Удобно разместившись прямо на его щупальцах, малыши и их родители заскользят по невидимым волнам бескрайнего моря. 
+                Брызги восторга захлестнут смельчаков, дерзнувших покорить водную стихию верхом на морском гиганте.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -3,35 +3,80 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - My Django Application</title>
+    <title>{{ title }} - CrazyRollerCoaster</title>
     {% load static %}
     <link rel="icon" href="{% static 'app/content/icon.ico' %}" type="image/x-icon" />
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/bootstrap.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/site.css' %}" />
     <script src="{% static 'app/scripts/modernizr-2.6.2.js' %}"></script>
     <script src="{% static 'app/scripts/jquery-1.10.2.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uuid@3.4.0/dist/umd/uuidv4.min.js"></script>
 </head>
 
 
 <body>
     <section id="container">
-        <div class="logo"><a href="{% url 'home' %}"><i>FunTime</i></a></div>
+        <div class="logo"><a href="{% url 'home' %}"><i>CrazyRollerCoaster</i></a></div>
         <div class="navbar">
             <ul>
                 <li><a href="{% url 'home' %}">Главная</a></li>
-                <li><a href="{% url 'about' %}">О парке</a></li>
                 <li><a href="{% url 'contact' %}">Контакты</a></li>
                 <li><a href="{% url 'blog' %}">Блог</a></li>
-                <li><a href="{% url 'links' %}">Полезные ресурсы</a></li>
-                <li><a href="{% url 'videopost' %}">Видео</a></li>
                 {% if user.is_superuser %}
                 <li><a href="{% url 'newpost' %}">Добавить статью</a></li>
+                <!--<li><a href="{% url 'all_tickets' %}">Билеты</a></li>-->
+                {% endif %}
+                {% if user.is_authenticated and not user.is_superuser %}
+                <li><button class="submit" style="font-size: 18px;" type="button" id="myBtn">Купить билеты</button></li>
+                <li><a href="{% url 'basket' %}">Корзина</a><div class="basket_num">0</div></li>
+                <li><a href="{% url 'my_tickets' %}">Мои билеты</a></li>
                 {% endif %}
                 <li>{% include 'app/loginpartial.html' %}</li>
                 {% if not user.is_authenticated %}
                 <li><a href="{% url 'registration' %}">Регистрация</a></li>
                 {% endif %}
             </ul>
+        </div>
+
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="text">Купить билет</div>
+                <br />
+                <div>
+                    <form method="post" action="{% url 'basket' %}" id="ticketForm">
+                        {% csrf_token %}
+                        <div>
+                            <label class="text1" for="{{ ticket_form.age.id_for_label }}">Тип билета:</label>
+                            {{ ticket_form.age }}
+                        </div>
+                        <br />
+                        <div>
+                            <label class="text1" for="{{ ticket_form.status.id_for_label }}">Статус билета:</label>
+                            {{ ticket_form.status }}
+                        </div>
+                        <br />
+                        <div>
+                            <label class="text1" for="{{ ticket_form.attractions.id_for_label }}">Желаемые аттракционы:</label>
+                            {{ ticket_form.attractions }}
+                        </div>
+                        <br />
+                        <div>
+                            <label class="text1" for="{{ ticket_form.group.id_for_label }}">Желаемая тематическая группа:</label>
+                            {{ ticket_form.group }}
+                        </div>
+                        <br />
+                        <div>
+                            <p style="font-size: 18px;">Цена билета: <span id="ticketPrice"></span></p>
+                        </div>
+                        <div class="button">
+                            <button class="submit" type="button" onclick="saveTicket()">Отправить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         {% block content %}{% endblock %}
@@ -45,6 +90,7 @@
 
         <script src="{% static 'app/scripts/bootstrap.js' %}"></script>
         <script src="{% static 'app/scripts/respond.js' %}"></script>
+        <script src="{% static 'app/scripts/main.js' %}"></script>
         {% block scripts %}{% endblock %}
     </section>
 </body>
