@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from .models import Comment
 from .models import Blog
+from .models import Tickets
 
 
 class BootstrapAuthenticationForm(AuthenticationForm):
@@ -54,3 +55,16 @@ class BlogForm(forms.ModelForm):
         model = Blog
         fields = ('title', 'description', 'content', 'image')
         labels = {'title': "Заголовок", 'description': "Краткое содержание", 'content': "Полное содержание", 'image': "Картинка"}
+
+        
+class TicketsForm(forms.ModelForm):
+    class Meta:
+        model = Tickets
+        labels = {
+            'age': 'Тип билета',
+            'status': 'Статус билета',
+            'attractions': 'Желаемые аттракционы',
+            'group': 'Желаемая тематическая группа',
+            'count': 'Количество'
+        }
+        fields = ('age', 'status', 'attractions', 'group', 'count', 'price')

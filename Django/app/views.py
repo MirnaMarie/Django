@@ -3,17 +3,26 @@ Definition of views.
 """
 
 from datetime import datetime
-from django.shortcuts import render, redirect
-from django.http import HttpRequest
+from telnetlib import STATUS
+from django.contrib.sessions.models import Session
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpRequest, JsonResponse, HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
 
 from app.forms import FeedbackForm
 from django.contrib.auth.forms import UserCreationForm
 
 from django.db import models
-from .models import Blog
+from .models import Attractions, Blog
 
 from .models import Comment
 from .forms import BlogForm, CommentForm
+
+from .models import Tickets
+from .forms import TicketsForm
+
+import uuid  # импортируем модуль uuid для генерации уникальных идентификаторов
+import json
 
 def home(request):
     """Renders the home page."""
@@ -22,7 +31,173 @@ def home(request):
         request,
         'app/index.html',
         {
-            'title':'Домашняя страница',
+            'title': 'Домашняя страница',
+            'year': datetime.now().year,
+        }
+    )
+
+def ticket_view(request):
+    age = {'adult': 'Взрослый', 'child': 'Детский'}
+    status = {'standard': 'Standard', 'vip': 'VIP', 'platinum': 'Platinum'}
+    attractions = {
+        'osminog': 'Осьминожка', 'fire': 'Пожарная команда', 'aviat': 'Авиаторы',
+        'koleso': 'Колесо обозрения', 'katam': 'Катамараны', 'gonki': 'Крутые гонки',
+        'katap': 'Катапульта', 'shaker': 'Шейкер', 'free': 'Свободное падение'
+    }
+    group = {'extrim': 'Экстремальные аттракционы', 'family': 'Семейные аттракционы', 'child': 'Детские аттракционы'}
+
+    if request.method == 'POST':
+        form = TicketsForm(request.POST)
+        if form.is_valid():
+            ticket_data = form.cleaned_data
+            ticket_data = {
+                'age': age.get(request.GET.get('age', ''), ''),
+                'status': status.get(request.GET.get('status', ''), ''),
+                'attractions': attractions.get(request.GET.get('attractions', ''), ''),
+                'group': group.get(request.GET.get('group', ''), ''),
+            }
+            ticket_data['count'] = 1  # Пример добавления поля 'count'
+            ticket_data['price'] = float(ticket_data['price'])
+            tickets = request.session.get('ticket_data', {})
+            request.session['ticket_data'] = tickets
+            return redirect('basket')
+        else:
+            print("Форма не валидна")
+            print(form.errors)
+    else:
+        form = TicketsForm()
+
+    context = {
+        'ticket_data': ticket_data,
+        'form': form,
+        'age': age,
+        'status': status,
+        'attractions': attractions,
+        'group': group,
+    }
+
+    return render(request, 'app/layout.html', context)
+
+def basket(request):
+    tickets = request.session.get('ticket_data', {})
+    total_price = 0
+
+    for ticket in tickets:
+        price = ticket.get('price')
+        count = ticket.get('count', 1)
+        if price:
+            total_price += price * count
+
+    context = {
+        'title': 'Корзина',
+        'year': datetime.now().year,
+        'total_price': total_price,
+        'ticket_data': tickets,
+    }
+
+    return render(request, 'app/basket.html', context)
+
+def confirm_order(request):
+    if request.method == 'POST':
+        ticket_data_str = request.POST.get('ticket_data', None)
+
+        if not ticket_data_str:
+            return JsonResponse({'error': 'Корзина пуста'}, status=400)
+
+        try:
+            ticket_data = json.loads(ticket_data_str)
+            if not isinstance(ticket_data, list):
+                raise json.JSONDecodeError("Invalid JSON format", ticket_data_str, 0)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Неверный формат JSON'}, status=400)
+
+        if not ticket_data:
+            return JsonResponse({'error': 'Корзина пуста'}, status=400)
+
+        for ticket in ticket_data:
+            form = TicketsForm(ticket)
+            if form.is_valid():
+                ticket_obj = form.save(commit=False)
+                ticket_obj.user = request.user if request.user.is_authenticated else None
+                ticket_obj.save()
+            else:
+                errors = form.errors.as_json()
+                return JsonResponse({'errors': errors}, status=400)
+            
+        return redirect('my_tickets')
+        return JsonResponse({'message': 'Заказ успешно оформлен и сохранен в базе данных.'}, status=201)
+    else:
+        return JsonResponse({'error': 'Метод запроса должен быть POST.'}, status=405)
+
+def my_tickets(request):
+    tickets = Tickets.objects.filter(user=request.user)
+    return render(request, 'app/my_tickets.html', {'tickets': tickets})
+
+def all_tickets(request):
+    tickets = Tickets.objects.all()
+    return render(request, 'app/all_tickets.html', {'tickets': tickets})
+
+def update_ticket_count(request, ticket_id):
+    tickets = request.session.get('ticket_data', {})
+
+    if ticket_id in tickets:
+        if 'increase' in request.POST:
+            tickets[ticket_id]['count'] = tickets[ticket_id].get('count', 1) + 1
+        elif 'decrease' in request.POST and tickets[ticket_id].get('count', 1) > 1:
+            tickets[ticket_id]['count'] = tickets[ticket_id].get('count', 1) - 1
+
+        request.session['ticket_data'] = tickets
+
+    return redirect('basket')
+
+def my_tickets(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    user_id = request.user.id
+    # Запрашиваем билеты текущего пользователя из базы данных
+    tickets = Tickets.objects.filter(user_id=user_id).order_by('-date')
+    data = None
+    age = {'adult': 'Взрослый', 'child': 'Детский'}
+    status = {'standard': 'Standard', 'vip': 'VIP', 'platinum': 'Platinum'}
+    attractions = {
+        'osminog': 'Осьминожка', 'fire': 'Пожарная команда', 'aviat': 'Авиаторы',
+        'koleso': 'Колесо обозрения', 'katam': 'Катамараны', 'gonki': 'Крутые гонки',
+        'katap': 'Катапульта', 'shaker': 'Шейкер', 'free': 'Свободное падение'
+    }
+    group = {'extrim': 'Экстремальные аттракционы', 'family': 'Семейные аттракционы', 'child': 'Детские аттракционы'}
+    if request.method == 'POST':
+        form = TicketsForm(request.POST)
+        if form.is_valid():
+            data = dict()
+            data['id'] = tickets.cleaned_data['id']
+            data['user'] = tickets.cleaned_data['user']
+            data['age'] = age[tickets.cleaned_data['age'] ]
+            data['status'] = status[ tickets.cleaned_data['status'] ]
+            data['attractions'] = attractions[ tickets.cleaned_data['attractions'] ]
+            data['group'] = group[ tickets.cleaned_data['group'] ]
+        form = None
+    else:
+        form = TicketsForm()
+
+    # Передаем билеты в контекст для отображения в шаблоне
+    context = {'tickets': tickets}
+    return render(request, 'app/my_tickets.html', context)
+
+def all_tickets_view(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    tickets = Tickets.objects.all()  # Выборка данных из базы данных
+    context = {'tickets': tickets}
+    return render(request, 'app/all_tickets.html', context)
+
+def all_tickets(request):
+    """Renders the contact page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/all_tickets.html',
+        {
+            'title':'Билеты',
             'year':datetime.now().year,
         }
     )
@@ -36,31 +211,6 @@ def contact(request):
         {
             'title':'Контакты',
             'message':'Твоя контактная страница.',
-            'year':datetime.now().year,
-        }
-    )
-
-def about(request):
-    """Renders the about page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/about.html',
-        {
-            'title':'О парке',
-            'message':'Страница описания твоего приложения.',
-            'year':datetime.now().year,
-        }
-    )
-
-def links(request):
-    """Renders the about page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/links.html',
-        {
-            'title':'Полезные ресурсы',
             'year':datetime.now().year,
         }
     )
@@ -226,14 +376,110 @@ def newpost(request):
         }
     )
 
-def videopost(request):
-    """Renders the about page."""
+def shaker(request):
+    """Renders the blog page."""
     assert isinstance(request, HttpRequest)
     return render(
         request,
-        'app/videopost.html',
+        'app/shaker.html',
         {
-            'title':'Видео',
+            'title':'Шейкер',
+            'year':datetime.now().year,
+        }
+    )
+
+def katap(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/katap.html',
+        {
+            'title':'Катапульта',
+            'year':datetime.now().year,
+        }
+    )
+
+def free(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/free.html',
+        {
+            'title':'Свободное падение',
+            'year':datetime.now().year,
+        }
+    )
+
+def osminog(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/osminog.html',
+        {
+            'title':'Осьминожка',
+            'year':datetime.now().year,
+        }
+    )
+
+def fire(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/fire.html',
+        {
+            'title':'Пожарная команда',
+            'year':datetime.now().year,
+        }
+    )
+
+def aviat(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/aviat.html',
+        {
+            'title':'Авиаторы',
+            'year':datetime.now().year,
+        }
+    )
+
+def katam(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/katam.html',
+        {
+            'title':'Катамараны',
+            'year':datetime.now().year,
+        }
+    )
+
+def gonki(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/gonki.html',
+        {
+            'title':'Крутые гонки',
+            'year':datetime.now().year,
+        }
+    )
+
+def koleso(request):
+    """Renders the blog page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/koleso.html',
+        {
+            'title':'Колесо обозрения',
             'year':datetime.now().year,
         }
     )
