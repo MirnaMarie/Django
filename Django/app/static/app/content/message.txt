@@ -1,0 +1,72 @@
+<h5 class="card-title">Форма обратной связи</h5>
+
+                        <!-- Кнопка, открывающая модальное окно -->
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#feedbackModal">
+                                Открыть форму обратной связи
+                            </button>
+                            
+                            <!-- Модальное окно -->
+                            <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="feedbackModalLabel">Техническая поддержка</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                    <!-- Форма -->
+                                    <form id="feedbackForm" action="{% url 'feedback' %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                        <label for="name">Имя:</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                        </div>
+                                        <div class="form-group">
+                                        <label for="email">Email:</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                        </div>
+                                        <div class="form-group">
+                                        <label for="message">Сообщение:</label>
+                                        <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                                        </div>
+                                        <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="agreeToNews" name="agree_to_news">
+                                        <label class="form-check-label" for="agreeToNews">Согласен на обработку персональных данных</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Отправить</button>
+                                    </form>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+  
+
+
+                            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="successModalLabel">Сообщение отправлено</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Ваше сообщение успешно отправлено!
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeSuccessModal()">Закрыть</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <script>
+                                function closeSuccessModal() {
+                                    $('#successModal').modal('hide'); // Закрыть модальное окно с уведомлением
+                                    $('body').removeClass('modal-open'); // Удалить класс, отвечающий за открытие модального окна
+                                    $('.modal-backdrop').remove(); // Удалить бэкдроп
+                                }
+                            </script>

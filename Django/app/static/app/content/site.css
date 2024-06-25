@@ -10,11 +10,25 @@ body {
 
 /* Set width on the form input elements since they're 100% wide by default */
 input,
-select,
 textarea {
     max-width: 280px;
     max-height: 150px;
     color:black
+}
+
+select {
+    max-width: 280px;
+    max-height: 150px;
+    color: black;
+    font-size: 18px;
+}
+
+select option {
+    color: black
+}
+
+select optgroup{
+    color: black
 }
 
 input[type=file]{
