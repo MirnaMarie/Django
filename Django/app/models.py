@@ -141,6 +141,7 @@ class Tickets(models.Model):
         return f"{self.age} - {self.status} - {self.attraction}"
     def __str__(self):
         return f"Ticket {self.id} for {self.user.username}"
+    
         
         
 class Attractions(models.Model):

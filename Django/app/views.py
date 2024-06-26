@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from app.forms import FeedbackForm
 from django.contrib.auth.forms import UserCreationForm
 
-from django.db import models
+from django.db import connection, models
 from .models import Attractions, Blog
 
 from .models import Comment
@@ -46,6 +46,8 @@ def ticket_view(request):
     }
     group = {'extrim': 'Экстремальные аттракционы', 'family': 'Семейные аттракционы', 'child': 'Детские аттракционы'}
 
+    ticket_data = None
+    
     if request.method == 'POST':
         form = TicketsForm(request.POST)
         if form.is_valid():
@@ -129,14 +131,6 @@ def confirm_order(request):
     else:
         return JsonResponse({'error': 'Метод запроса должен быть POST.'}, status=405)
 
-def my_tickets(request):
-    tickets = Tickets.objects.filter(user=request.user)
-    return render(request, 'app/my_tickets.html', {'tickets': tickets})
-
-def all_tickets(request):
-    tickets = Tickets.objects.all()
-    return render(request, 'app/all_tickets.html', {'tickets': tickets})
-
 def update_ticket_count(request, ticket_id):
     tickets = request.session.get('ticket_data', {})
 
@@ -151,36 +145,41 @@ def update_ticket_count(request, ticket_id):
     return redirect('basket')
 
 def my_tickets(request):
-    """Renders the blog page."""
+    """Renders the my_tickets page with the user's tickets."""
     assert isinstance(request, HttpRequest)
-    user_id = request.user.id
+    user = request.user
+
     # Запрашиваем билеты текущего пользователя из базы данных
-    tickets = Tickets.objects.filter(user_id=user_id).order_by('-date')
-    data = None
-    age = {'adult': 'Взрослый', 'child': 'Детский'}
-    status = {'standard': 'Standard', 'vip': 'VIP', 'platinum': 'Platinum'}
+    tickets = Tickets.objects.filter(user=user).order_by('-id')
+
+    age_map = dict(Tickets.AGE)
+    status_map = dict(Tickets.STATUS)
+    #attractions_map = dict(Tickets.ATTRACTIONS)
     attractions = {
         'osminog': 'Осьминожка', 'fire': 'Пожарная команда', 'aviat': 'Авиаторы',
         'koleso': 'Колесо обозрения', 'katam': 'Катамараны', 'gonki': 'Крутые гонки',
         'katap': 'Катапульта', 'shaker': 'Шейкер', 'free': 'Свободное падение'
     }
-    group = {'extrim': 'Экстремальные аттракционы', 'family': 'Семейные аттракционы', 'child': 'Детские аттракционы'}
-    if request.method == 'POST':
-        form = TicketsForm(request.POST)
-        if form.is_valid():
-            data = dict()
-            data['id'] = tickets.cleaned_data['id']
-            data['user'] = tickets.cleaned_data['user']
-            data['age'] = age[tickets.cleaned_data['age'] ]
-            data['status'] = status[ tickets.cleaned_data['status'] ]
-            data['attractions'] = attractions[ tickets.cleaned_data['attractions'] ]
-            data['group'] = group[ tickets.cleaned_data['group'] ]
-        form = None
-    else:
-        form = TicketsForm()
+    group_map = dict(Tickets.GROUP)    
 
+    ticket_data = []
+    for ticket in tickets:
+        ticket_data.append({
+            'id': ticket.id,
+            'user': ticket.user.username,
+            'age': age_map.get(ticket.age),
+            'status': status_map.get(ticket.status),
+            'attractions': attractions.get(ticket.attractions),
+            'group': group_map.get(ticket.group),
+        })
+        print(ticket.attractions)
+    
+    
     # Передаем билеты в контекст для отображения в шаблоне
-    context = {'tickets': tickets}
+    context = {
+        'tickets': ticket_data
+    }
+
     return render(request, 'app/my_tickets.html', context)
 
 def all_tickets_view(request):
@@ -278,7 +277,8 @@ def registration(request):
 def blog(request):
     """Renders the blog page."""
     assert isinstance(request, HttpRequest)
-    posts = Blog.objects.all() # запрос на выбор всех статей блога из модели
+    posts = Blog.objects.raw("SELECT * FROM Posts") #SQL
+    #posts = Blog.objects.all() # ORM
     return render(
         request,
         'app/blog.html',
@@ -292,7 +292,8 @@ def blog(request):
 def blogpost(request, parametr):
     """Renders the blogpost page."""
     assert isinstance(request, HttpRequest)
-    post_1 = Blog.objects.get(id=parametr) # запрос на выбор конкретной статьи по параметру
+    #post_1 = Blog.objects.get(id=parametr) # ORM
+    post_1 = Blog.objects.raw("SELECT * FROM Posts WHERE id = %s", [parametr]) #SQL
     comments = Comment.objects.filter(post=parametr)
     if request.method == "POST": # после отправки данных формы на сервер методом POST
         form = CommentForm(request.POST)
@@ -313,6 +314,101 @@ def blogpost(request, parametr):
             'year':datetime.now().year,
             'comments': comments, # передача всех комментариев к данной статье в шаблон веб-страницы
             'form': form, # передача формы добавления комментария в шаблон веб-страницы
+        }
+    )
+
+def newpost(request):
+    """Renders the blogpost page."""
+    assert isinstance(request, HttpRequest)
+    if request.method == "POST": # после отправки данных формы на сервер методом POST
+        blogform = BlogForm(request.POST, request.FILES)
+        if blogform.is_valid():
+            #blog_f = blogform.save(commit=False)
+            #blog_f.author = request.user
+            #blog_f.posted = datetime.now() 
+            #blog_f.save() # сохраняем изменения после добавления полей
+            
+             #newblog=Blog.objects.create(                    #ORM
+                 #=blogform.cleaned_data['title'],
+                 #content=blogform.cleaned_data['content'],
+                 #image=blogform.cleaned_data['image'],
+                 #posted=datetime.now(),
+                 #author=request.user,)
+            
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO Posts (title, description, content, image, posted, author_id) VALUES (%s, %s, %s, %s, %s, %s)", 
+                [blogform.cleaned_data['title'], blogform.cleaned_data['description'], blogform.cleaned_data['content'], blogform.cleaned_data['image'], 
+                datetime.now(), request.user.id])
+                newblog=Blog.objects.get(title=blogform.cleaned_data['title'])
+                return redirect('blog')
+            
+        return redirect('blog') # переадресация на ту же страницу статьи после отправки комментария
+    else:
+        blogform = BlogForm() # создание формы для ввода комментария
+    return render(
+        request,
+        'app/newpost.html',
+        {
+            'blogform': blogform, # передача формы добавления комментария в шаблон веб-страницы
+            'title': 'Добавить статью блога',
+            
+            'year':datetime.now().year,
+        }
+    )
+
+def edit_post(request, post_id):
+    post = get_object_or_404(Blog, id=post_id)
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+             form.save()  # Сохранение данных формы в базе данных
+             return redirect('blogpost', parametr=post_id)  # Перенаправление на страницу поста после редактирования
+
+            #title = form.cleaned_data['title']
+            #content = form.cleaned_data['content']
+            
+            # Получаем имя файла, если есть
+            #if 'image' in form.cleaned_data and form.cleaned_data['image']:
+                #image = form.cleaned_data['image'].name
+            #else:
+                #image = post.image.name  # или post.image, в зависимости от структуры модели
+            
+
+            # Обовление данных с использованием SQL-запроса
+            # with connection.cursor() as cursor:
+                # cursor.execute(""" UPDATE Posts SET title = %s, content = %s, image = %s WHERE id = %s """, [title, content, image, post_id])
+
+            #return redirect('blogpost', parametr=post_id)  # Перенаправление на страницу поста после редактирования
+
+    else:
+        form = BlogForm(instance=post)
+    
+    return render(request, 'app/edit_post.html', {
+        'form': form,
+        'post': post
+    })
+
+def delete_post(request, post_id):
+    post = get_object_or_404(Blog, id=post_id, author=request.user)
+    if request.method == "POST":
+       post.delete()   # Удаление поста с использованием ORM
+       
+       # Выполнение SQL запроса для удаления данных
+       # with connection.cursor() as cursor:
+            # cursor.execute("DELETE FROM Posts WHERE id = %s", [post_id])
+    return redirect('blog')
+
+
+def videopost(request):
+    """Renders the about page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/videopost.html',
+        {
+            'title':'Видео',
+            'message':'Общие сведения о нашем проекте',
+            'year':datetime.now().year,
         }
     )
 
@@ -348,30 +444,6 @@ def extrim(request):
         'app/extrim.html',
         {
             'title':'Экстремальные аттракционы',
-            'year':datetime.now().year,
-        }
-    )
-
-def newpost(request):
-    """Renders the blogpost page."""
-    assert isinstance(request, HttpRequest)
-    if request.method == "POST": # после отправки данных формы на сервер методом POST
-        blogform = BlogForm(request.POST, request.FILES)
-        if blogform.is_valid():
-            blog_f = blogform.save(commit=False)
-            blog_f.author = request.user
-            blog_f.posted = datetime.now() 
-            blog_f.save() # сохраняем изменения после добавления полей
-        return redirect('blog') # переадресация на ту же страницу статьи после отправки комментария
-    else:
-        blogform = BlogForm() # создание формы для ввода комментария
-    return render(
-        request,
-        'app/newpost.html',
-        {
-            'blogform': blogform, # передача формы добавления комментария в шаблон веб-страницы
-            'title': 'Добавить статью блога',
-            
             'year':datetime.now().year,
         }
     )
