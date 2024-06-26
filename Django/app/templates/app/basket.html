@@ -13,7 +13,7 @@
             <form method="post" action="{% url 'confirm_order' %}">
                 {% csrf_token %}
                 <input type="hidden" name="ticket_data" id="ticketDataInput" value="">
-                <button class="confirm" type="submit">Оформить заказ</button>
+                <button class="confirm" type="submit" onclick="clearBasket()">Оформить заказ</button>
             </form>
         </div>
     </div>

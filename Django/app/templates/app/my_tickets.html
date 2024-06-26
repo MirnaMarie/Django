@@ -1,29 +1,36 @@
 {% extends "app/layout.html" %}
 
+{% load static %}
+
 {% block content %}
 
 <div class="header1"><h1>Мои билеты</h1></div>
 
-<div class="basket">
-    <div class="block_offer">
-        <div class="ticket_basket">
-            <p>{{ data.user.username }}</p>
-            <strong>Билет №{{ data.id }}</strong>
-            <ul>
-                <li>{{ data.age }}</li>
-                <li>{{ statusText }}</li>
-                {% if ticket.status == 'standard' %}
-                <li>{{ attractionsText }}</li>
-                {% elif ticket.status == 'vip' %}
-                <li>{{ groupText }}</li>
-                {% endif %}
-            </ul>
-            <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=Ticket%20ID:%20{{ tickets.id }}" alt="QR Code">
-        </div>
+<div class="my_tickets_con">
+    {% if tickets %}
+    {% for ticket in tickets %}
+    <div class="my_tickets">
+        <p style="font-size:18px; font-weight: bold; margin: 0 0 0 10px;">{{ ticket.user }}</p>
+        <strong style="position:absolute; top:4%; left:75%;">Билет № {{ ticket.id }}</strong>
+        <ul>
+            <li>{{ ticket.age }}</li>
+            <li>{{ ticket.status }}</li>
+            {% if ticket.attractions %}
+            <li>{{ ticket.attractions }}</li>
+            {% endif %}
+            {% if ticket.group %}
+            <li>{{ ticket.group }}</li>
+            {% endif %}
+        </ul>
+        <img style="position:absolute; top:50%; left:85%;" src="{% static 'app/content/qr.png'%} " width="40" height="40" alt="qr" />
     </div>
+    {% endfor %}
+
+    {% else %}
     <div class="no-items" style="justify-content: center; align-items: center; display: none;">
         <p class="text">У Вас пока нет билетов.</p>
     </div>
+    {% endif %}
 </div>
 
 
