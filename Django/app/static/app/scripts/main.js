@@ -25,6 +25,7 @@ window.onclick = function (event) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    var submitButton = document.getElementById('submitButton');
     var ageField = document.querySelector('select[name="age"]');
     var statusField = document.querySelector('select[name="status"]');
     var attractionsField = document.querySelector('select[name="attractions"]');
@@ -32,18 +33,20 @@ document.addEventListener('DOMContentLoaded', function () {
     var ticketPriceElement = document.getElementById('ticketPrice');
 
     window.saveTicket = function () {
-        var ticketData = JSON.parse(localStorage.getItem('ticketData')) || [];
-        var newTicket = {
-            age: ageField.value,
-            status: statusField.value,
-            attractions: attractionsField.value,
-            group: groupField.value,
-            count: 1,
-            price: parseFloat(ticketPriceElement.dataset.price),
-        };
-        ticketData.push(newTicket);
-        localStorage.setItem('ticketData', JSON.stringify(ticketData));
-        window.location.href = "/basket/";
+        if (validateForm()) {
+            var ticketData = JSON.parse(localStorage.getItem('ticketData')) || [];
+            var newTicket = {
+                age: ageField.value,
+                status: statusField.value,
+                attractions: attractionsField.value,
+                group: groupField.value,
+                count: 1,
+                price: parseFloat(ticketPriceElement.dataset.price),
+            };
+            ticketData.push(newTicket);
+            localStorage.setItem('ticketData', JSON.stringify(ticketData));
+            window.location.href = "/basket/?order=success";
+        }
     }
 
     function updatePrice() {
@@ -164,25 +167,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Слушаем изменения в полях возраста и статуса и обновляем доступность полей аттракционов и групп
+    function validateForm() {
+        var statusValue = statusField.value;
+        var attractionsValue = attractionsField.value;
+        var groupValue = groupField.value;
+
+        var error = '';
+        if (statusValue === 'standard' && attractionsValue === '') {
+            error = 'Выберите аттракцион!';
+        } else if (statusValue === 'vip' && groupValue === '') {
+            error = 'Выберите тематическую группу!';
+        }
+
+        if (error) {
+            alert(error);
+            return false;
+        }
+
+        return true;
+    }
+
     ageField.addEventListener('change', function () {
-        resetFields(); // Сброс полей
-        updateFields(); // Обновление доступности опций
-        updatePrice(); // Обновление цены
+        resetFields();
+        updateFields();
+        updatePrice();
     });
 
     statusField.addEventListener('change', function () {
-        resetFields(); // Сброс полей
-        updateFields(); // Обновление доступности опций
-        updatePrice(); // Обновление цены
+        resetFields();
+        updateFields();
+        updatePrice();
     });
 
     attractionsField.addEventListener('change', updatePrice);
     groupField.addEventListener('change', updatePrice);
 
-    // Вызываем updatePrice и updateFields для начальной установки при загрузке страницы
+    submitButton.addEventListener('click', function (event) {
+        if (!validateForm()) {
+            event.preventDefault();
+        }
+    });
+
     updatePrice();
     updateFields();
 });
+
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -249,11 +279,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var tickets = JSON.parse(localStorage.getItem('ticketData')) || [];
     var ticketDataInput = document.getElementById('ticketDataInput');
 
-    if (tickets.length === 0) {
-        console.log("Корзина пуста"); // Для отладки, чтобы убедиться, что данные корректно загружаются
-        return;
-    }
-
     ticketDataInput.value = JSON.stringify(tickets);
 });
 
@@ -289,6 +314,9 @@ function removeFromCart(index) {
     location.reload(); // Перезагрузка страницы для обновления корзины
 }
 
-
-
-
+function clearBasket() {
+    var tickets = JSON.parse(localStorage.getItem('ticketData')) || [];
+    tickets.splice(0, tickets.length);
+    localStorage.setItem('ticketData', JSON.stringify(tickets));
+    location.reload();
+}
